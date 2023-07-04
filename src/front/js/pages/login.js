@@ -1,126 +1,113 @@
 import React, { useContext, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-
-import { Context } from "../store/appContext";
-
 import "../../styles/home.css";
+import { useNavigate } from "react-router-dom";
+import { Context  } from "../store/appContext";
+import rigoImageUrl from "../../img/rigo-baby.jpg";
 
 
 export const Login = () => {
   const { store, actions } = useContext(Context);
-
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
+  const navigate = useNavigate();
 
-  const [msg, setMsg] = useState("");
+  // const token = sessionStorage.getItem("token");
+  console.log("this is your token", store.token);
 
-  const [isLoginTabActive, setIsLoginTabActive] = useState(true);
-  const [isRegistrationSuccess, setIsRegistrationSuccess] = useState(false);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     if (isSignup) {
+  //       // Perform signup logic
+  //       const response = await fetch(
+  //         "https://3001-romeb92-authflaskreacta-hqm9ju7k3ns.ws-us101.gitpod.io/api/token",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             email: email,
+  //             password: password,
+  //           }),
+  //         }
+  //       );
+  //       if (response.ok) {
+  //         // Signup successful
+  //         navigate("/login");
+  //       } else {
+  //         // Signup failed, handle the error scenario
+  //         const errorData = await response.json();
+  //         console.log("errored: " + errorData);
+  //         // Handle the error response
+  //       }
+  //     } else {
+  //       // Perform login logic
+  //       fetch(
+  //         "https://3001-romeb92-authflaskreacta-hqm9ju7k3ns.ws-us101.gitpod.io/api/token",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({ email, password }),
+  //         }
+  //       );
+  //       if (response.ok) {
+  //         // Login successful
+  //         const data = await response.json();
+  //         // Store the token in sessionStorage
+  //         sessionStorage.setItem("token", data.token);
+  //         // Redirect to private page or desired route
+  //         navigate("/private");
+  //       } else {
+  //         // Login failed, handle the error scenario
+  //         const errorData = await response.json();
+  //         console.log("signup: " + JSON.stringify(errorData));
+  //         // Handle the error response
+  //       }
+  //     }
+  //   } catch (error) {
+  //     // Handle error in case of network issues
+  //   }
+  // };
 
-  const handleTabClick = (isLoginTab) => {
-    setIsLoginTabActive(isLoginTab);
+  const handleClick = () => {
+    actions.login(email, password);
   };
-
-  const handleSubmit = (ev, islogin = true) => {
-    ev.preventDefault();
-    console.table([{ email: email, pass: pass, name: name }]);
-    if (islogin) {
-      actions.login(email, pass).then(() => {
-        if (store.token) {
-          navigate("/home");
-        }
-      });
-    } else {
-      actions
-        .sign_up(email, pass, name)
-        .then(() => {
-          setIsLoginTabActive(true);
-        })
-        .catch((err) => {
-          console.error(err);
-          if (!store.user) {
-            setMsg(store.msg);
-          }
-        });
-    }
-  };
-
-  const containerStyle = {
-   // backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    width: "100vw",
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  };
-
+   
+  if(store.token && store.token != "" && store.token != undefined) navigate("/home");
   return (
-    <div style={containerStyle}>
-      <div className="login-page">
-        <div className="titleLogin">Sign In</div>
-        <div className="login-card">
-          <div className="card-header">
-            <button
-              className={`login-tab ${isLoginTabActive ? "active" : ""}`}
-              onClick={() => handleTabClick(true)}
-            >
-              Sign In
+    <div className="container">
+      <h1>{isSignup ? "Signup" : "Login"}</h1>
+
+      {store.token && store.token != "" && store.token != undefined ? (
+        "You are logged in" + store.token
+      ) : (
+        <div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleClick}>{isSignup ? "Signup" : "Login"}</button>
+
+          <p>
+            {isSignup ? "Already have an account?" : "Don't have an account?"}
+            <button onClick={() => setIsSignup(!isSignup) + handleClick}>
+              {isSignup ? "Login" : "Signup"}
             </button>
-            <button
-              className={`register-tab ${isLoginTabActive ? "" : "active"}`}
-              onClick={() => handleTabClick(false)}
-            >
-              Register
-            </button>
-          </div>
-          <div className="card-body">
-            {/* LOGIN FORM */}
-            <form
-              id={isLoginTabActive ? "login-form" : "sign_up"}
-              onSubmit={(ev) => handleSubmit(ev, isLoginTabActive)}
-            >
-              {isLoginTabActive ? (
-                ""
-              ) : (
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  required
-                  value={name}
-                  onChange={(ev) => setName(ev.target.value)}
-                />
-              )}
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={email}
-                onChange={(ev) => setEmail(ev.target.value)}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={pass}
-                onChange={(ev) => setPass(ev.target.value)}
-              />
-              {store.msg}
-              <button
-                type="submit"
-                onClick={(ev) => handleSubmit(ev, isLoginTabActive)}
-              >
-                {isLoginTabActive ? "Sign In" : "Register"}
-              </button>
-            </form>
-          </div>
+          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 };
